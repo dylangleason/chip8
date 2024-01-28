@@ -1,9 +1,3 @@
 # chip8
-### _Your Name <your.name@example.com>_
 
-This is a project to do ... something.
-
-## License
-
-Specify license here
-
+Common Lisp implementation of a CHIP-8 emulator.
