@@ -41,7 +41,18 @@
     (let ((*instructions-per-update* 1))
       (load-program *test-cpu* #(#x60 #x1A))
       (cycle *test-cpu*)
-      (ok (eq #x1A (aref (v *test-cpu*) 0))))))
+      (ok (eq #x1A (aref (v *test-cpu*) 0)))))
+
+  (init)
+
+  (testing "load value of vy into vy"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x62 #x1A
+		    #x65 #x40
+		    #x82 #x50))
+      (cycle *test-cpu*)
+      (ok (eq #x40 (aref (v *test-cpu*) 2))))))
 
 (deftest test-ret
   (testing "return from a subroutine"

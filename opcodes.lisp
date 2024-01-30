@@ -60,6 +60,13 @@ program counter if the check evaluates to true."
   (with-slots (v) emulator
     (setf (aref v (xnn-x operands)) (xnn-nn operands))))
 
+(defmethod ld ((emulator chip8) (operands xyn) (prefix (eql #x8)))
+  "Set the EMULATOR register V at addres X to the value of register V at
+address Y."
+  (with-slots (v) emulator
+    (setf (aref v (xyn-x operands))
+	  (aref v (xyn-y operands)))))
+
 (defgeneric add (emulator operands prefix)
   (:documentation "Add two OPERANDS and store in an EMULATOR register."))
 
