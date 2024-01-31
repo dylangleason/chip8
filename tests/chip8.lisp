@@ -130,3 +130,33 @@
 		    #x80 #x14)) ; add values stored in v[0] and v[1]
       (cycle *test-cpu*)
       (ok (eq 0 (aref (v *test-cpu*) #xF))))))
+
+(deftest test-or
+  (testing "calculate bitwise OR of vx and vy"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #x1
+		    #x61 #x2
+		    #x80 #x11))
+      (cycle *test-cpu*)
+      (ok (eq 3 (aref (v *test-cpu*) 0))))))
+
+(deftest test-and
+  (testing "calculate bitwise AND of vx and vy"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #x1
+		    #x61 #x2
+		    #x80 #x12))
+      (cycle *test-cpu*)
+      (ok (eq 0 (aref (v *test-cpu*) 0))))))
+
+(deftest test-xor
+  (testing "calculate bitwise XOR of vx and vy"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #x1
+		    #x61 #x3
+		    #x80 #x13))
+      (cycle *test-cpu*)
+      (ok (eq 2 (aref (v *test-cpu*) 0))))))

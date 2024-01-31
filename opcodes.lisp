@@ -78,7 +78,7 @@ value stored at address X and byte NN."
 
 (defmethod add ((emulator chip8) (operands xyn) (prefix (eql #x8)))
   "Set the EMULATOR registers V at address X to the sum of the
-values stored at address X and address Y. If the result is greater
+values stored at register addresses X and Y. If the result is greater
 than 8 bits, set the registers V at address F to 1, indicating the
 carry flag is set, otherwise set it to 0. Only the lowest bits of the
 result are kept and stored in V at address X."
@@ -91,6 +91,27 @@ result are kept and stored in V at address X."
 	    (clear-hi-byte sum))
       (setf (aref (v emulator) #xF)
 	    (if (> sum #xFF) 1 0)))))
+
+(defun bor (emulator operands)
+  "Set the EMULATOR register V at address X to the bitwise OR of the
+values stored at register addresses X and Y."
+  (bitwise-op emulator operands #'logior))
+
+(defun band (emulator operands)
+  "Set the EMULATOR register V at address X to the bitwise AND of the
+values stored at register addresses X and Y."
+  (bitwise-op emulator operands #'logand))
+
+(defun bxor (emulator operands)
+  "Set the EMULATOR register V at address X to the bitwise XOR of the
+values stored at register addresses X and Y."
+  (bitwise-op emulator operands #'logxor))
+
+(defun bitwise-op (emulator operands f)
+  (with-slots (v) emulator
+    (let ((x (xyn-x operands))
+	  (y (xyn-y operands)))
+      (setf (aref v x) (funcall f (aref v x) (aref v y))))))
 
 (defun vx-equal-nn-p (emulator xnn)
   (eql (aref (slot-value emulator 'v) (xnn-x xnn))
