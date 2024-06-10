@@ -125,7 +125,7 @@
   (testing "add vx to vy, where sum <= 255, unsets carry flag"
     (let ((*instructions-per-update* 3))
       (load-program
-       *test-cpu* #(#x60 #xF0   ; load #xFF into v[0]
+       *test-cpu* #(#x60 #xF0   ; load #xF0 into v[0]
 		    #x61 #xE    ; load #xE into v[1]
 		    #x80 #x14)) ; add values stored in v[0] and v[1]
       (cycle *test-cpu*)
@@ -160,3 +160,35 @@
 		    #x80 #x13))
       (cycle *test-cpu*)
       (ok (eq 2 (aref (v *test-cpu*) 0))))))
+
+(deftest test-sub
+  (testing "subtract value in vx by vy and store back to vx"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #xFF   ; load #xFF into v[0]
+		    #x61 #xDF   ; load #xDF into v[1]
+		    #x80 #x15)) ; sub values stored in v[0] and v[1]
+      (cycle *test-cpu*)
+      (ok (eq 32 (aref (v *test-cpu*) 0)))))
+
+  (init)
+
+  (testing "subtract value in vx by vy and set borrow flag to 1"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #xFF
+		    #x61 #xDF
+		    #x80 #x15))
+      (cycle *test-cpu*)
+      (ok (eq 1 (aref (v *test-cpu*) #xF)))))
+
+  (init)
+
+  (testing "subtract value in vx by vy and set borrow flag to 0"
+    (let ((*instructions-per-update* 3))
+      (load-program
+       *test-cpu* #(#x60 #xDF
+		    #x61 #xFF
+		    #x80 #x15))
+      (cycle *test-cpu*)
+      (ok (eq 0 (aref (v *test-cpu*) #xF))))))

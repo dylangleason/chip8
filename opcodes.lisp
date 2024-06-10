@@ -77,11 +77,11 @@ value stored at address X and byte NN."
 	(xnn-nn operands)))
 
 (defmethod add ((emulator chip8) (operands xyn) (prefix (eql #x8)))
-  "Set the EMULATOR registers V at address X to the sum of the
-values stored at register addresses X and Y. If the result is greater
-than 8 bits, set the registers V at address F to 1, indicating the
-carry flag is set, otherwise set it to 0. Only the lowest bits of the
-result are kept and stored in V at address X."
+  "Set the EMULATOR variable register X to the sum of the
+values stored in registers X and Y. If the result is greater than 8
+bits, set VF to 1, indicating the carry flag is set, otherwise set it
+to 0. Only the lowest bits of the result are kept and stored in
+register X."
   (with-slots (v) emulator
     (let* ((x (xyn-x operands))
 	   (y (xyn-y operands))
@@ -91,6 +91,43 @@ result are kept and stored in V at address X."
 	    (clear-hi-byte sum))
       (setf (aref (v emulator) #xF)
 	    (if (> sum #xFF) 1 0)))))
+
+(defun sub (emulator operands)
+  "Set the EMULATOR variable register X to the difference of values stored in
+registers X and Y. If the value in register X is greater than register
+Y, set VF to 1, indicating the borrow flag is not set. Otherwise set
+to 0."
+  (with-slots (v) emulator
+    (let* ((x (xyn-x operands))
+	   (y (xyn-y operands))
+	   (val-x (aref (v emulator) x))
+	   (val-y (aref (v emulator) y)))
+      (setf (aref (v emulator) #xF)
+	    (if (> val-x val-y) 1 0))
+      (setf (aref (v emulator) x)
+	    (abs (- val-x val-y))))))
+
+(defun shr (emulator operands)
+  "If the least-significant bit of Vx is 1, then set VF to 1, otherwise
+set to 0. Then divide Vx by 2."
+  (with-slots (v) emulator
+    (let* ((x (xyn-x operands))
+	   (y (xyn-y operands))
+	   (val-x (aref (v emulator) x)))
+      (setf (aref (v emulator) #xF)
+	    (if (= 1 (logand 1 val-x)) 1 0))
+      (setf (aref (v emulator) x)
+	    (ash x -1)))))
+
+(defun subn (emulator operands)
+  "Set EMULATOR register VF to 1 if Vy is greater than Vx, otherwise set
+to 0. Then subtract Vx from Vy and store results in Vx."
+  ;; TODO
+  )
+
+(defun shl (emulator operands)
+  ;; TODO
+  )
 
 (defun bor (emulator operands)
   "Set the EMULATOR register V at address X to the bitwise OR of the
@@ -118,6 +155,5 @@ values stored at register addresses X and Y."
        (xnn-nn xnn)))
 
 (defun vx-equal-vy-p (emulator xyn)
-  (with-slots (v) emulator 
-    (eql (aref (v emulator) (xyn-x xyn))
-	 (aref (v emulator) (xyn-y xyn)))))
+  (eql (aref (v emulator) (xyn-x xyn))
+       (aref (v emulator) (xyn-y xyn))))

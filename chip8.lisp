@@ -154,12 +154,24 @@ by the program counter, then increment the program counter by 2 bytes."
       ((#xE) (shl emulator op)))))
 
 (defun execute-e (emulator instruction)
-  ;; TODO
-  )
+  (let ((op (create-xnn instruction)))
+    (ccase (xnn-nn op)
+      ((#xA1) (sknp emulator op))
+      ((#x9E) (skp emulator op)))))
 
 (defun execute-f (emulator instruction)
-  ;; TODO
-  )
+  (let ((op (create-xnn instruction)))
+    (ccase (xnn-nn op)
+      ((#x07) (sknp emulator op))
+      ((#x0A) (skp emulator op))
+      ((#x15) (skp emulator op))
+      ((#x18) (skp emulator op))
+      ((#x1E) (skp emulator op))
+      ((#x29) (skp emulator op))
+      ((#x33) (skp emulator op))
+      ((#x55) (skp emulator op))
+      ((#x65) (skp emulator op))
+      )))
 
 (defstruct xyn
   x y n)
