@@ -3,7 +3,7 @@
 (in-package #:chip8)
 
 (defun cls (emulator)
-  "Clear the screen will clear the EMULATOR display."
+  "Clear the screen. Clears the EMULATOR display."
   (with-slots (display) emulator
     (clear display)))
 
@@ -28,27 +28,31 @@ program counter to the stack, then set the program counter to NNN."
 (defgeneric se (emulator operands))
 
 (defmethod se ((emulator chip8) (operands xnn))
-  "Skip next instruction if register x = nn. Set the EMULATOR program
-counter if the check evaluates to true."
+  "Given OPERANDS x and nn, skip next instruction if value at Vx equals
+nn. Set the EMULATOR program counter if the check evaluates to true."
   (when (vx-equal-nn-p emulator operands)
     (incf (slot-value emulator 'pc) 2)))
 
 (defmethod se ((emulator chip8) (operands xyn))
-  "Skip next instruction if register x = register y. Set the EMULATOR
-program counter if the check evaluates to true."
+  "Given OPERANDS x and y, skip next instruction if value at Vx equals
+value at Vy. Set the EMULATOR program counter if the check evaluates
+to true."
   (when (vx-equal-vy-p emulator operands)
     (incf (slot-value emulator 'pc) 2)))
 
 (defgeneric sne (emulator operands)
-  (:documentation "Skip an EMULATOR instruction if not equal to a value."))
+  (:documentation "Skip an EMULATOR instruction if two values specified by OPERANDS are
+not equal."))
 
 (defmethod sne ((emulator chip8) (operands xnn))
-  "Skip next EMULATOR instruction if register X != NN."
+  "Given OPERANDS x and nn, skip next EMULATOR instruction if value at Vx
+does not equal nn."
   (when (not (vx-equal-nn-p emulator operands))
     (incf (slot-value emulator 'pc) 2)))
 
 (defmethod sne ((emulator chip8) (operands xyn))
-  "Skip next EMULATOR instruction if register X != register Y."
+  "Given OPERANDS x and y, skip next EMULATOR instruction if value at Vx
+does not equal value at Vy."
   (when (not (vx-equal-vy-p emulator operands))
     (incf (slot-value emulator 'pc) 2)))
 
@@ -56,13 +60,12 @@ program counter if the check evaluates to true."
   (:documentation "Load a value into an EMULATOR register."))
 
 (defmethod ld ((emulator chip8) (operands xnn) (prefix (eql #x6)))
-  "Set the EMULATOR variable register at address X to a byte NN."
+  "Given OPERANDS xnn, set the EMULATOR value at Vx to byte nn."
   (with-slots (v) emulator
     (setf (aref v (xnn-x operands)) (xnn-nn operands))))
 
 (defmethod ld ((emulator chip8) (operands xyn) (prefix (eql #x8)))
-  "Set the EMULATOR register V at addres X to the value of register V at
-address Y."
+  "Given OPERANDS xyn, set the EMULATOR value at Vx to the value of Vy."
   (with-slots (v) emulator
     (setf (aref v (xyn-x operands))
 	  (aref v (xyn-y operands)))))
@@ -71,17 +74,16 @@ address Y."
   (:documentation "Add two OPERANDS and store in an EMULATOR register."))
 
 (defmethod add ((emulator chip8) (operands xnn) (prefix (eql #x7)))
-  "Set the EMULATOR register V at address X to the sum of the
-value stored at address X and byte NN."
+  "Given OPERANDS xnn, set the EMULATOR value at Vx to the sum of itself
+and byte nn."
   (incf (aref (slot-value emulator 'v) (xnn-x operands))
 	(xnn-nn operands)))
 
 (defmethod add ((emulator chip8) (operands xyn) (prefix (eql #x8)))
-  "Set the EMULATOR variable register X to the sum of the
-values stored in registers X and Y. If the result is greater than 8
-bits, set VF to 1, indicating the carry flag is set, otherwise set it
-to 0. Only the lowest bits of the result are kept and stored in
-register X."
+  "Given OPERANDS, add values of EMULATOR registers Vx and Vy, writing
+sum back to Vx. If the sum is larger than 8 bits, set EMULATOR
+register at VF to 1, indicating the carry flag is set, otherwise set
+it to 0. Only the lowest bits of the result are kept and stored in Vx."
   (with-slots (v) emulator
     (let* ((x (xyn-x operands))
 	   (y (xyn-y operands))
@@ -93,10 +95,10 @@ register X."
 	    (if (> sum #xFF) 1 0)))))
 
 (defun sub (emulator operands)
-  "Set the EMULATOR variable register X to the difference of values stored in
-registers X and Y. If the value in register X is greater than register
-Y, set VF to 1, indicating the borrow flag is not set. Otherwise set
-to 0."
+  "Given OPERANDS, subract values of EMULATOR registers Vx and Vy,
+writing difference back to Vx. If the value in Vx is greater than
+register Vy, set EMULATOR register at VF to 1, indicating the borrow
+flag is not set. Otherwise set to 0."
   (with-slots (v) emulator
     (let* ((x (xyn-x operands))
 	   (y (xyn-y operands))
@@ -108,8 +110,9 @@ to 0."
 	    (abs (- val-x val-y))))))
 
 (defun shr (emulator operands)
-  "If the least-significant bit of Vx is 1, then set VF to 1, otherwise
-set to 0. Then divide Vx by 2."
+  "Given OPERANDS, shift value of EMULATOR register Vx to the right by
+1. If the least-significant bit of value at Vx is 1, then set VF to 1,
+otherwise set to 0. Then divide value at Vx by 2."
   (with-slots (v) emulator
     (let* ((x (xyn-x operands))
 	   (y (xyn-y operands))
@@ -122,8 +125,15 @@ set to 0. Then divide Vx by 2."
 (defun subn (emulator operands)
   "Set EMULATOR register VF to 1 if Vy is greater than Vx, otherwise set
 to 0. Then subtract Vx from Vy and store results in Vx."
-  ;; TODO
-  )
+  (with-slots (v) emulator
+    (let* ((x (xyn-x operands))
+	   (y (xyn-y operands))
+	   (val-x (aref (v emulator) x))
+	   (val-y (aref (v emulator) y)))
+      (setf (aref (v emulator) #xF)
+	    (if (> val-y val-x) 1 0))
+      (setf (aref (v emulator) x)
+	    (abs (- val-y val-x))))))
 
 (defun shl (emulator operands)
   ;; TODO

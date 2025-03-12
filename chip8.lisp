@@ -174,6 +174,8 @@ by the program counter, then increment the program counter by 2 bytes."
       )))
 
 (defstruct xyn
+  "Opcode where X and Y are addresses in the variable register, and N is
+the remaining nibble of data."
   x y n)
 
 (defun create-xyn (word)
@@ -184,6 +186,8 @@ by the program counter, then increment the program counter by 2 bytes."
    :n (read-nibble word 4)))
 
 (defstruct xnn
+  "Opcode where X is an address in the variable register, and NN is the
+remaining byte of data."
   x nn)
 
 (defun create-xnn (word)
