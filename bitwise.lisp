@@ -32,7 +32,7 @@
 
 (defun read-hi-nibble (byte)
   "Read the high nibble of BYTE."
-  (ash (clear-lo-nibble byte) -4))
+  (ash byte -4))
 
 (defun read-lo-byte (word)
   "Read the low byte of WORD."
@@ -40,12 +40,20 @@
 
 (defun read-hi-byte (word)
   "Read the high byte of WORD."
-  (ash (clear-lo-byte word) -8))
+  (ash word -8))
 
 (defun read-nibble (word n)
   "Read nibble N from a 16-bit WORD."
   (let ((offset (offset-to-hi-nibble n)))
     (ash (logand word (ash #xF offset)) (- offset))))
+
+(defun read-byte-msb (byte)
+  "Read the most significant bit of BYTE."
+  (ash byte -7))
+
+(defun read-byte-lsb (byte)
+  "Read the least significant bit of BYTE."
+  (logand 1 byte))
 
 (defun mask-lo-nibbles-on (n)
   "Compute mask to turn on first N least significant nibbles."
