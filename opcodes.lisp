@@ -118,7 +118,7 @@ otherwise set to 0. Then divide value at Vx by 2."
 	   (y (xyn-y operands))
 	   (val-x (aref (v emulator) x)))
       (setf (aref (v emulator) #xF)
-	    (if (= 1 (logand 1 val-x)) 1 0))
+	    (if (= 1 (read-byte-lsb val-x)) 1 0))
       (setf (aref (v emulator) x)
 	    (ash x -1)))))
 
@@ -136,8 +136,17 @@ to 0. Then subtract Vx from Vy and store results in Vx."
 	    (abs (- val-y val-x))))))
 
 (defun shl (emulator operands)
-  ;; TODO
-  )
+  "Given OPERANDS, shift value of EMULATOR register Vx to the left by
+1. If the most significant-bit of value at Vx is 1, then set VF to 1,
+otherwise set to 0. Then multiply value at Vx by 2."
+  (with-slots (v) emulator
+    (let* ((x (xyn-x operands))
+	   (y (xyn-y operands))
+	   (val-x (aref (v emulator) x)))
+      (setf (aref (v emulator) #xF)
+	    (if (= 1 (read-byte-msb val-x)) 1 0))
+      (setf (aref (v emulator) x)
+	    (ash x 1)))))
 
 (defun bor (emulator operands)
   "Set the EMULATOR register V at address X to the bitwise OR of the
