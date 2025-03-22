@@ -192,3 +192,35 @@
 		    #x80 #x15))
       (chip8::cycle *test-cpu*)
       (ok (eq 0 (aref (chip8::v *test-cpu*) #xF))))))
+
+(deftest subn
+  (testing "subtract value in vy by vx and store back to vx"
+    (let ((chip8::*instructions-per-update* 3))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xDF
+		    #x61 #xFF
+		    #x80 #x17))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 32 (aref (chip8::v *test-cpu*) 0)))))
+
+  (init)
+
+  (testing "subtract value in vy by vx and set borrow flag to 0"
+    (let ((chip8::*instructions-per-update* 3))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xFF
+		    #x61 #xDF
+		    #x80 #x17))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 0 (aref (chip8::v *test-cpu*) #xF)))))
+
+  (init)
+
+  (testing "subtract value in vy by vx and set borrow flag to 1"
+    (let ((chip8::*instructions-per-update* 3))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xDF
+		    #x61 #xFF
+		    #x80 #x17))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 1 (aref (chip8::v *test-cpu*) #xF))))))
