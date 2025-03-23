@@ -115,12 +115,16 @@ flag is not set. Otherwise set to 0."
 otherwise set to 0. Then divide value at Vx by 2."
   (with-slots (v) emulator
     (let* ((x (xyn-x operands))
-	   (y (xyn-y operands))
+	   ;; TODO: in the below implementation, the value of Y is
+	   ;; ignored. Consider optionally setting the value of Vx to
+	   ;; Vy, and making it configurable, as some implementations
+	   ;; rely on this behavior. See:
+	   ;; https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#8xy6-and-8xye-shift
 	   (val-x (aref (v emulator) x)))
       (setf (aref (v emulator) #xF)
 	    (if (= 1 (read-byte-lsb val-x)) 1 0))
       (setf (aref (v emulator) x)
-	    (ash x -1)))))
+	    (ash val-x -1)))))
 
 (defun subn (emulator operands)
   "Set EMULATOR register VF to 1 if Vy is greater than Vx, otherwise set
