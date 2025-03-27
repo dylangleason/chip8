@@ -233,3 +233,12 @@
 		    #x80 #x06))
       (chip8::cycle *test-cpu*)
       (ok (eq #x7F (aref (chip8::v *test-cpu*) 0))))))
+
+(deftest test-shl
+  (testing "shift value in vx to the left by 1"
+    (let ((chip8::*instructions-per-update* 2))
+      (chip8::load-program
+       *test-cpu* #(#x60 #x7F
+		    #x80 #x0E))
+      (chip8::cycle *test-cpu*)
+      (ok (eq #xFE (aref (chip8::v *test-cpu*) 0))))))
