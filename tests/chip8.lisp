@@ -229,16 +229,50 @@
   (testing "shift value in vx to the right by 1"
     (let ((chip8::*instructions-per-update* 2))
       (chip8::load-program
-       *test-cpu* #(#x60 #xFF
-		    #x80 #x06))
+       *test-cpu* #(#x60 #xFF #x80 #x06))
       (chip8::cycle *test-cpu*)
-      (ok (eq #x7F (aref (chip8::v *test-cpu*) 0))))))
+      (ok (eq #x7F (aref (chip8::v *test-cpu*) 0)))))
+
+  (init)
+
+  (testing "shift value in vx sets vf to 1"
+    (let ((chip8::*instructions-per-update* 2))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xFF #x80 #x06))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 1 (aref (chip8::v *test-cpu*) #xF)))))
+
+  (init)
+
+  (testing "shift value in vx sets vf to 0"
+    (let ((chip8::*instructions-per-update* 2))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xF0 #x80 #x06))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 0 (aref (chip8::v *test-cpu*) #xF))))))
 
 (deftest test-shl
   (testing "shift value in vx to the left by 1"
     (let ((chip8::*instructions-per-update* 2))
       (chip8::load-program
-       *test-cpu* #(#x60 #x7F
-		    #x80 #x0E))
+       *test-cpu* #(#x60 #x7F #x80 #x0E))
       (chip8::cycle *test-cpu*)
-      (ok (eq #xFE (aref (chip8::v *test-cpu*) 0))))))
+      (ok (eq #xFE (aref (chip8::v *test-cpu*) 0)))))
+
+  (init)
+
+  (testing "shift value in vx sets vf to 1"
+    (let ((chip8::*instructions-per-update* 2))
+      (chip8::load-program
+       *test-cpu* #(#x60 #xEA #x80 #x0E))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 1 (aref (chip8::v *test-cpu*) #xF)))))
+
+  (init)
+
+  (testing "shift value in vx sets vf to 0"
+    (let ((chip8::*instructions-per-update* 2))
+      (chip8::load-program
+       *test-cpu* #(#x60 #x7F #x80 #x0E))
+      (chip8::cycle *test-cpu*)
+      (ok (eq 0 (aref (chip8::v *test-cpu*) #xF))))))

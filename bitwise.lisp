@@ -2,6 +2,10 @@
 
 (in-package #:chip8)
 
+(defun clamp-to-byte (value)
+  "Mask the VALUE by discarding bits exceeding the range of a byte."
+  (logand #xFF value))
+
 (defun clear-lo-nibble (byte)
   "Mask the lo nibble of BYTE off."
   (logand byte #xF0))

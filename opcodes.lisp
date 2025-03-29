@@ -150,7 +150,7 @@ otherwise set to 0. Then multiply value at Vx by 2."
       (setf (aref (v emulator) #xF)
 	    (if (= 1 (read-byte-msb val-x)) 1 0))
       (setf (aref (v emulator) x)
-	    (ash val-x 1)))))
+	    (clamp-to-byte (ash val-x 1))))))
 
 (defun bor (emulator operands)
   "Set the EMULATOR register V at address X to the bitwise OR of the
